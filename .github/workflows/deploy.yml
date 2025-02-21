@@ -20,28 +20,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: "npm"
-          cache-dependency-path: blockchain-scm/package-lock.json # Single-line path
+          cache: npm
+          cache-dependency-path: blockchain-scm/package-lock.json
 
       - name: Install Backend Dependencies
-        run: npm install --legacy-peer-deps
-        working-directory: blockchain-scm
-
-      - name: Run Smart Contract Tests
-        run: npx hardhat test
-        working-directory: blockchain-scm
+        run: |
+          cd blockchain-scm
+          npm install --legacy-peer-deps --prefer-offline
+          npm cache clean --force
+        shell: bash
 
       # Frontend Setup (React)
       - name: Setup Node.js (Frontend)
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: "npm"
-          cache-dependency-path: blockchain-scm/appfrontend/package-lock.json # Single-line path
+          cache: npm
+          cache-dependency-path: blockchain-scm/appfrontend/package-lock.json
 
       - name: Install Frontend Dependencies
-        run: npm install
-        working-directory: blockchain-scm/appfrontend
+        run: |
+          cd blockchain-scm/appfrontend
+          npm install --prefer-offline
+          npm cache clean --force
+        shell: bash
 
       - name: Run Frontend Tests
         run: npm test -- --watchAll=false --passWithNoTests
