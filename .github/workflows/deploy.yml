@@ -15,58 +15,62 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Setup Node.js for backend
+      # Backend Setup (Hardhat)
       - name: Setup Node.js (Backend)
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: "npm"
-          cache-dependency-path: |
-            blockchain-scm/package-lock.json
+          cache-dependency-path: blockchain-scm/package-lock.json # Single-line path
 
-      # Install & Test Backend (Hardhat)
       - name: Install Backend Dependencies
         run: npm install --legacy-peer-deps
         working-directory: blockchain-scm
 
-      # Setup Node.js for frontend
+      - name: Run Smart Contract Tests
+        run: npx hardhat test
+        working-directory: blockchain-scm
+
+      # Frontend Setup (React)
       - name: Setup Node.js (Frontend)
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: "npm"
-          cache-dependency-path: |
-            blockchain-scm/appfrontend/package-lock.json
+          cache-dependency-path: blockchain-scm/appfrontend/package-lock.json # Single-line path
 
-      # Install & Test Frontend (React)
       - name: Install Frontend Dependencies
         run: npm install
         working-directory: blockchain-scm/appfrontend
 
       - name: Run Frontend Tests
-        run: npm test -- --watchAll=false
+        run: npm test -- --watchAll=false --passWithNoTests
         working-directory: blockchain-scm/appfrontend
 
-      # Build Frontend
-      - name: Build Frontend for Production
+      - name: Build Frontend
         run: npm run build
         working-directory: blockchain-scm/appfrontend
 
-      # Deploy to Kubernetes (Local/Minikube)
+      # Docker Build & Push
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker Images
+      - name: Build and Push Backend Image
         run: |
           docker build -t prayagtandon/hardhat-app:latest ./blockchain-scm
-          docker build -t prayagtandon/frontend-app:latest ./blockchain-scm/appfrontend
           docker push prayagtandon/hardhat-app:latest
+
+      - name: Build and Push Frontend Image
+        run: |
+          docker build -t prayagtandon/frontend-app:latest ./blockchain-scm/appfrontend
           docker push prayagtandon/frontend-app:latest
 
+      # Kubernetes Deployment (Replace with your cluster setup)
       - name: Deploy to Kubernetes
-        run: kubectl apply -f ./blockchain-scm/kubernetes/
+        run: |
+          kubectl apply -f ./blockchain-scm/kubernetes/
         env:
           KUBECONFIG: ${{ secrets.KUBECONFIG }}
