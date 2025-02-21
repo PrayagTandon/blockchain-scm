@@ -1,0 +1,52 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      # Install dependencies for Hardhat backend
+      - name: Install Backend Dependencies
+        run: npm install --legacy-peer-deps
+        working-directory: ./blockchain-scm
+
+      # Run Hardhat tests
+      - name: Test Smart Contracts
+        run: npx hardhat test
+        working-directory: ./blockchain-scm
+
+      # Install frontend dependencies
+      - name: Install Frontend Dependencies
+        run: npm install
+        working-directory: ./blockchain-scm/appfrontend
+
+      # Run frontend tests (e.g., Jest)
+      - name: Test Frontend
+        run: npm test
+        working-directory: ./blockchain-scm/appfrontend
+
+      # Build frontend
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./blockchain-scm/appfrontend
+
+      # Deploy to Kubernetes (Local/Minikube)
+      - name: Deploy to Kubernetes
+        run: |
+          docker build -t prayagtandon/hardhat-app:latest ./blockchain-scm
+          docker build -t prayagtandon/frontend-app:latest ./blockchain-scm/appfrontend
+          kubectl apply -f ./blockchain-scm/kubernetes/
