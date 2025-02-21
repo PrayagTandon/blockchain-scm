@@ -256,3 +256,13 @@ kubectl apply -f kubernetes/frontend-deployment.yaml
 # To get the frontend URL
 minikube service frontend --url
 ```
+
+#### Verify the Setup
+
+```
+docker-compose up -d
+```
+
+```
+kubectl get pods
+```
