@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hardhat-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hardhat-node
+  template:
+    metadata:
+      labels:
+        app: hardhat-node
+    spec:
+      containers:
+        - name: hardhat-node
+          image: prayagtandon/hardhat-app:latest
+          ports:
+            - containerPort: 8545
+          volumeMounts:
+            - name: contract-artifacts
+              mountPath: /app/artifacts
+      volumes:
+        - name: contract-artifacts
+          persistentVolumeClaim:
+            claimName: contract-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hardhat-node
+spec:
+  selector:
+    app: hardhat-node
+  ports:
+    - protocol: TCP
+      port: 8545
+      targetPort: 8545
+  type: NodePort
