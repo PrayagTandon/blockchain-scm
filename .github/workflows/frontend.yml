@@ -15,14 +15,14 @@ jobs:
       - name: Verify Frontend Files
         run: |
           ls -la blockchain-scm/appfrontend
-          echo "package-lock.json exists: $(test -f blockchain-scm/appfrontend/package-lock.json && echo 'yes' || echo 'no')"
+          echo "package-lock.json exists: $(test -f blockchain-scm/tree/main/appfrontend/package-lock.json && echo 'yes' || echo 'no')"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: npm
-          cache-dependency-path: blockchain-scm/appfrontend/package-lock.json
+          cache-dependency-path: blockchain-scm/tree/main/appfrontend/package-lock.json
 
       - name: Install Dependencies
         run: |
