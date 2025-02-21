@@ -1,0 +1,64 @@
+name: Frontend & Deployment CI/CD
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  frontend:
+    name: Frontend Setup & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Frontend Files
+        run: |
+          ls -la blockchain-scm/appfrontend
+          echo "package-lock.json exists: $(test -f blockchain-scm/appfrontend/package-lock.json && echo 'yes' || echo 'no')"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+          cache-dependency-path: blockchain-scm/appfrontend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd blockchain-scm/appfrontend
+          npm install --prefer-offline
+
+      - name: Run Tests
+        run: npm test -- --watchAll=false --passWithNoTests
+        working-directory: blockchain-scm/appfrontend
+
+      - name: Build Frontend
+        run: npm run build
+        working-directory: blockchain-scm/appfrontend
+
+  docker:
+    name: Docker Image Build
+    runs-on: ubuntu-latest
+    needs: frontend
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Frontend Docker Image
+        run: |
+          cd blockchain-scm/appfrontend
+          docker build -t prayagtandon/frontend-app:latest .
+
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: docker
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy Frontend
+        run: kubectl apply -f ./blockchain-scm/kubernetes/frontend-deployment.yaml
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
