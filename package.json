@@ -6,7 +6,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "test:coverage": "hardhat coverage"
   },
   "repository": {
     "type": "git",

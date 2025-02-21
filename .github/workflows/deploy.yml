@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 20.x
           cache: "npm"
-          cache-dependency-path: | # Fix paths here
+          cache-dependency-path: |
             blockchain-scm/package-lock.json
 
       # Install & Test Backend (Hardhat)
@@ -29,15 +29,13 @@ jobs:
         run: npm install --legacy-peer-deps
         working-directory: blockchain-scm
 
-      # ... rest of your steps ...
-
       # Setup Node.js for frontend
       - name: Setup Node.js (Frontend)
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: "npm"
-          cache-dependency-path: | # Fix paths here
+          cache-dependency-path: |
             blockchain-scm/appfrontend/package-lock.json
 
       # Install & Test Frontend (React)
