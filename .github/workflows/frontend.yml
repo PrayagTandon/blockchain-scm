@@ -1,4 +1,4 @@
-name: Frontend & Deployment CI/CD
+name: Frontend CI/CD
 
 on:
   push:
@@ -6,36 +6,34 @@ on:
 
 jobs:
   frontend:
-    name: Frontend Setup & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Verify Frontend Files
-        run: |
-          ls -la blockchain-scm/appfrontend
-          echo "package-lock.json exists: $(test -f blockchain-scm/tree/main/appfrontend/package-lock.json && echo 'yes' || echo 'no')"
+      # Debug: List all files to verify structure
+      - name: Debug Directory Structure
+        run: ls -la
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
           cache: npm
-          cache-dependency-path: blockchain-scm/tree/main/appfrontend/package-lock.json
+          cache-dependency-path: appfrontend/package-lock.json # Update path
 
       - name: Install Dependencies
         run: |
-          cd blockchain-scm/appfrontend
+          cd appfrontend  # No "blockchain-scm" prefix
           npm install --prefer-offline
 
       - name: Run Tests
         run: npm test -- --watchAll=false --passWithNoTests
-        working-directory: blockchain-scm/appfrontend
+        working-directory: appfrontend # Simplified path
 
       - name: Build Frontend
         run: npm run build
-        working-directory: blockchain-scm/appfrontend
+        working-directory: appfrontend
 
   docker:
     name: Docker Image Build
